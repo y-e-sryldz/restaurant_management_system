@@ -23,6 +23,7 @@ if __name__ == "__main__":
 
 
 
+
     #aşçı ekranı
     asci = tk.Tk()
     asci.title("Aşçı Ekranı")
