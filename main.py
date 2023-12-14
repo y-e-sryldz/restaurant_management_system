@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import simpledialog
 import queue
+import threading
 import time
 
 class GarsonArayuzu:
@@ -13,7 +14,7 @@ class GarsonArayuzu:
         self.masa_sayisi = 6
 
         # Masa ve siparişlerin tutulacağı sözlük
-        self.masalar = {masa_numarasi: {"siparisler": [], "durum": "Boş", "yas_kontrolu": None, "thread": None} for masa_numarasi in range(1, self.masa_sayisi + 1)}
+        self.masalar = {masa_numarasi: {"siparisler": [], "durum": "Boş", "yas_kontrolu": None, "thread": None, "musteri": None} for masa_numarasi in range(1, self.masa_sayisi + 1)}
 
         # Arayüzü oluştur
         self.arayuzu_olustur()
@@ -28,6 +29,9 @@ class GarsonArayuzu:
             yas_onay.grid(row=masa_numarasi, column=1, padx=5, pady=5)
             self.masalar[masa_numarasi]["yas_kontrolu"] = yas_kontrol
 
+        # Müşteri Ekle Butonu
+        tk.Button(self.pencere, text="Müşteri Ekle", command=self.musteri_ekle).grid(row=self.masa_sayisi + 1, column=0, padx=5, pady=5)
+
     def siparis_al(self, masa_numarasi):
         if self.masalar[masa_numarasi]["thread"] is None or not self.masalar[masa_numarasi]["thread"].is_alive():
             yas_kontrol = self.masalar[masa_numarasi]["yas_kontrolu"].get()
@@ -39,6 +43,17 @@ class GarsonArayuzu:
                 self.masalar[masa_numarasi]["durum"] = "Dolu"
                 # Sipariş bilgisini aşçı arayüzüne ileti
                 self.asci_arayuzu.siparisi_ilet(masa_numarasi, yas_kontrol)
+
+    def musteri_ekle(self):
+        masa_numarasi = simpledialog.askinteger("Masa Seç", "Müşteri eklemek istediğiniz masa numarasını girin (1-6):")
+        if masa_numarasi and 1 <= masa_numarasi <= self.masa_sayisi and self.masalar[masa_numarasi]["durum"] == "Boş":
+            musteri_ad = simpledialog.askstring("Müşteri Bilgisi", "Müşteri adını girin:")
+            if musteri_ad:
+                self.masalar[masa_numarasi]["musteri"] = musteri_ad
+                self.masalar[masa_numarasi]["durum"] = "Müşteri Var"
+                print(f"Masa {masa_numarasi} için {musteri_ad} isimli müşteri eklenmiştir.")
+                # Müşteri bilgisini aşçı arayüzüne ileti (isteğe bağlı)
+                # self.asci_arayuzu.musteri_ilet(masa_numarasi, musteri_ad)
 
 class AsciArayuzu:
     def __init__(self, pencere, garson_arayuzu):
