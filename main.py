@@ -146,6 +146,70 @@ class AsciArayuzu:
 
         # Sipariş durumu güncelle
         self.garson_arayuzu.siparis_durumu_guncelle(masa_numarasi, "Hazır")
+
+class KasaArayuzu:
+    def __init__(self, pencere, garson_arayuzu):
+        self.pencere = pencere
+        self.pencere.title("Kasa Arayüzü")
+        self.pencere.geometry("400x300+1400+200")
+        self.garson_arayuzu = garson_arayuzu
+        self.pencere.after(1000, self.otomatik_guncelle)
+        # Dolu masaların listesini tutan bir ListBox ekleyin
+        self.dolu_masalar_listesi = tk.Listbox(self.pencere)
+        self.dolu_masalar_listesi.grid(row=1, column=0, padx=5, pady=5)
+        self.secili_masa = None
+
+        # Ödeme butonunu ekleyin
+        tk.Button(self.pencere, text="Ödeme Yap", command=self.odeme_yap).grid(row=0, column=0, padx=5, pady=5)
+
+        # Dolu masalar listesini güncelle
+        self.guncelle_dolu_masalar_listesi()
+
+    def otomatik_guncelle(self):
+        # Otomatik olarak dolu masalar listesini güncelle
+        self.guncelle_dolu_masalar_listesi()
+
+        # Timer'ı bir sonraki güncelleme için tekrar başlat
+        self.pencere.after(1000, self.otomatik_guncelle)
+
+    def odeme_yap(self):
+        if self.secili_masa:
+            # Masa numarasını al
+            masa_numarasi = int(self.secili_masa.split()[-1])
+
+            # Sipariş durumunu "Boş" olarak güncelle
+            self.garson_arayuzu.siparis_durumu_guncelle(masa_numarasi, "Boş")
+
+            # Masa durumunu "Boş" olarak güncelle
+            self.garson_arayuzu.masalar[masa_numarasi]["durum"] = "Boş"
+            self.garson_arayuzu.masa_durumu_guncelle(masa_numarasi, "")
+
+            # Müşteri bilgisini temizle
+            self.garson_arayuzu.masalar[masa_numarasi]["musteri"] = None
+
+            # Dolu masalar listesinden seçili masayı sil
+            self.dolu_masalar_listesi.delete(tk.ACTIVE)
+
+            # Ödeme yapıldı mesajını ekrana yazdır
+            print(f"Ödeme yapıldı - {self.secili_masa}")
+
+            # Seçili masayı sıfırla
+            self.secili_masa = None
+
+
+    def guncelle_dolu_masalar_listesi(self):
+        # Dolu masalar listesini güncelle
+        self.dolu_masalar_listesi.delete(0, tk.END)
+        for masa_numarasi, masa in self.garson_arayuzu.masalar.items():
+            if masa["durum"] == "Dolu":
+                self.dolu_masalar_listesi.insert(tk.END, f"Masa {masa_numarasi}")
+
+
+def run_kasa_arayuzu(garson_arayuzu):
+    root_kasa = tk.Tk()
+    kasa_arayuzu = KasaArayuzu(root_kasa, garson_arayuzu)
+    root_kasa.mainloop()
+
 def run_garson_arayuzu():
     root = tk.Tk()
     garson_pencere = tk.Toplevel(root)
@@ -157,7 +221,11 @@ def run_garson_arayuzu():
     # asci_arayuzu'nu garson_arayuzu'na atayın
     asci_arayuzu.garson_arayuzu = garson_arayuzu
 
+    # Kasa arayüzünü başlatın
+    run_kasa_arayuzu(garson_arayuzu)
+
     root.mainloop()
+
 if __name__ == "__main__":
     garson_thread = threading.Thread(target=run_garson_arayuzu)
     garson_thread.start()
