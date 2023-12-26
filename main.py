@@ -146,8 +146,7 @@ class AsciArayuzu:
 
         # Sipariş durumu güncelle
         self.garson_arayuzu.siparis_durumu_guncelle(masa_numarasi, "Hazır")
-
-if __name__ == "__main__":
+def run_garson_arayuzu():
     root = tk.Tk()
     garson_pencere = tk.Toplevel(root)
     asci_pencere = tk.Toplevel(root)
@@ -159,3 +158,6 @@ if __name__ == "__main__":
     asci_arayuzu.garson_arayuzu = garson_arayuzu
 
     root.mainloop()
+if __name__ == "__main__":
+    garson_thread = threading.Thread(target=run_garson_arayuzu)
+    garson_thread.start()
