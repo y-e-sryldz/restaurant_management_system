@@ -158,6 +158,7 @@ class KasaArayuzu:
         self.dolu_masalar_listesi = tk.Listbox(self.pencere)
         self.dolu_masalar_listesi.grid(row=1, column=0, padx=5, pady=5)
         self.secili_masa = None
+        self.dolu_masalar_listesi.bind("<ButtonRelease-1>", self.masa_sec)
 
         # Ödeme butonunu ekleyin
         tk.Button(self.pencere, text="Ödeme Yap", command=self.odeme_yap).grid(row=0, column=0, padx=5, pady=5)
@@ -172,13 +173,25 @@ class KasaArayuzu:
         # Timer'ı bir sonraki güncelleme için tekrar başlat
         self.pencere.after(1000, self.otomatik_guncelle)
 
+    def masa_sec(self, event):
+        # Listbox'tan seçili masa numarasını al
+        selected_index = self.dolu_masalar_listesi.curselection()
+        if selected_index:
+            masa_numarasi = int(self.dolu_masalar_listesi.get(selected_index).split()[-1])
+
+            # Seçili masayı ödeme yapmak için sakla
+            self.secili_masa = f"Masa {masa_numarasi}"
+            print(f"Seçili Masa: {self.secili_masa}")
+        else:
+            print("Lütfen bir masa seçin.")
+
     def odeme_yap(self):
         if self.secili_masa:
             # Masa numarasını al
             masa_numarasi = int(self.secili_masa.split()[-1])
 
             # Sipariş durumunu "Boş" olarak güncelle
-            self.garson_arayuzu.siparis_durumu_guncelle(masa_numarasi, "Boş")
+            self.garson_arayuzu.siparis_durumu_guncelle(masa_numarasi, "")
 
             # Masa durumunu "Boş" olarak güncelle
             self.garson_arayuzu.masalar[masa_numarasi]["durum"] = "Boş"
@@ -196,6 +209,8 @@ class KasaArayuzu:
             # Seçili masayı sıfırla
             self.secili_masa = None
 
+            # Dolu masalar listesini güncelle
+            self.guncelle_dolu_masalar_listesi()
 
     def guncelle_dolu_masalar_listesi(self):
         # Dolu masalar listesini güncelle
