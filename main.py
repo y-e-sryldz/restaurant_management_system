@@ -21,6 +21,27 @@ class GarsonArayuzu:
         self.arayuzu_olustur()
         # Garson arayüzüne referans ekleyin
         self.garson_arayuzu = self
+        self.bekleyen_musteriler = []
+
+    def siradakini_ekle(self):
+        if self.bekleyen_musteriler:
+            bekleyen_musteri = self.bekleyen_musteriler.pop(0)
+            masa_numarasi = simpledialog.askinteger("Masa Seç", "Müşteri eklemek istediğiniz masa numarasını girin:")
+
+            if masa_numarasi:
+                print(f"Sıradaki müşteri {bekleyen_musteri.get('musteri_adi')}, Masa {masa_numarasi}'ye oturdu.")
+                print(
+                    f"Bekleyen müşteriler: {', '.join(musteri.get('musteri_adi') for musteri in self.bekleyen_musteriler)}")
+                # Masa durumunu güncelle
+                self.masa_durumu_guncelle(masa_numarasi, "Dolu")
+                # Müşteri bilgisini sınıfa ekle
+                self.masalar[masa_numarasi]["musteri"] = bekleyen_musteri.get("musteri_adi")
+            else:
+                print("Masaya müşteri oturtulamadı, masa_numarasi None.")
+
+            # Diğer işlemleri ekleyebilirsiniz
+        else:
+            print("Bekleyen müşteri bulunmamaktadır.")
 
     def arayuzu_olustur(self):
         # Masa butonlarını ve yaş kontrolü için checkbox'ları oluştur
@@ -34,6 +55,12 @@ class GarsonArayuzu:
 
         # Müşteri Ekle Butonu
         tk.Button(self.pencere, text="Müşteri Ekle", command=self.musteri_ekle).grid(row=0, column=0, padx=5, pady=5)
+        # Müşteri Ekle Butonu
+        tk.Button(self.pencere, text="Müşteri Ekle", command=self.musteri_ekle).grid(row=0, column=0, padx=5, pady=5)
+
+        # Sıradakini Ekle Butonu
+        tk.Button(self.pencere, text="Sıradakini Ekle", command=self.siradakini_ekle).grid(row=0, column=1, padx=5,
+                                                                                           pady=5)
 
         # Sipariş Durumu ve Masa Durumu Gösterimi İçin Etiketler
         tk.Label(self.pencere, text="Sipariş Durumu").grid(row=0, column=2, padx=5, pady=5)
@@ -76,23 +103,19 @@ class GarsonArayuzu:
 
                 if musteri_ad:
                     self.masalar[masa_numarasi]["musteri"] = musteri_ad
-                    self.masalar[masa_numarasi]["durum"] = "Müşteri Var"
+                    self.masalar[masa_numarasi]["durum"] = "Dolu"
                     print(f"Masa {masa_numarasi} için {musteri_ad} isimli müşteri eklenmiştir.")
-                    # Müşteri bilgisini aşçı arayüzüne ileti (isteğe bağlı)
-                    # self.asci_arayuzu.musteri_ilet(masa_numarasi, musteri_ad)
-
                     # Masa durumunu güncelle
                     self.garson_arayuzu.masa_durumu_guncelle(masa_numarasi, "Dolu")
 
                 else:
                     print("Müşteri adı boş bırakılamaz.")
 
-            elif masa_durumu == "Müşteri Var":
-                print(f"Masa {masa_numarasi} zaten bir müşteriye sahiptir.")
-
-            else:
-                print(f"Masa {masa_numarasi} dolu durumdadır.")
-
+            elif masa_durumu == "Dolu":
+                musteri_ad = simpledialog.askstring("Müşteri Bilgisi", "Müşteri adını girin:")
+                print(f"Masa {masa_numarasi} dolu durumdadır. {musteri_ad} müşteri sırasına alınıyor.")
+                self.bekleyen_musteriler.append({"musteri_adi": musteri_ad})
+                print(f"Bekleyen müşteri sırasına alındı. Bekleyen müşteriler: {', '.join(musteri.get('musteri_adi') for musteri in self.bekleyen_musteriler)}")
 
 class AsciArayuzu:
     def __init__(self, pencere, garson_arayuzu):
