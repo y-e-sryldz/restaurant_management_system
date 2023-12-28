@@ -204,7 +204,9 @@ class KasaArayuzu:
             self.dolu_masalar_listesi.delete(tk.ACTIVE)
 
             # Ödeme yapıldı mesajını ekrana yazdır
-            print(f"Ödeme yapıldı - {self.secili_masa}")
+            print("Ödeme yapılıyor...")
+            time.sleep(1)  # Ödeme işlemi için 1 saniye bekleme
+            print("Ödeme yapıldı -", self.secili_masa)
 
             # Seçili masayı sıfırla
             self.secili_masa = None
